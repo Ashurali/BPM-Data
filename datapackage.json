@@ -1,0 +1,200 @@
+{
+  "name": "huawei-band7-bpm-steps",
+  "title": "Huawei Band 7 Heart Rate & Step Count Dataset",
+  "description": "Minute-level heart rate (BPM) and step count data from a Huawei Band 7 wearable device, collected over 26 days from a single user for cross-modal BPM imputation research.",
+  "version": "1.0.0",
+  "created": "2026-03-26",
+  "contributors": [
+    {
+      "title": "Michael Kurniawan Soegeng",
+      "role": "author"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "path": "https://creativecommons.org/licenses/by/4.0/",
+      "title": "Creative Commons Attribution 4.0 International"
+    }
+  ],
+  "keywords": [
+    "heart-rate",
+    "wearable",
+    "time-series",
+    "imputation",
+    "step-count",
+    "huawei-band-7",
+    "health-data"
+  ],
+  "sources": [
+    {
+      "title": "Huawei Health App Data Export",
+      "path": "https://consumer.huawei.com/en/mobileservices/health/",
+      "description": "Data exported from Huawei Health app via Settings > Privacy > Request Data Export"
+    }
+  ],
+  "collection": {
+    "device": "Huawei Band 7 (LEA-B19)",
+    "sensors": {
+      "heart_rate": "Optical photoplethysmography (PPG)",
+      "steps": "3-axis accelerometer pedometer"
+    },
+    "period": {
+      "start": "2026-03-01",
+      "end": "2026-03-26",
+      "duration_days": 26
+    },
+    "subject": {
+      "count": 1,
+      "description": "Single male university student"
+    },
+    "conditions": {
+      "activity_protocol": "None — unstructured daily life (classes, studying, walking, sleeping)",
+      "wear_location": "Left wrist, 24/7 (removed ~1 hr/day for charging)",
+      "sampling_mode": "Device-controlled (not user-configurable); samples more frequently during detected activity"
+    }
+  },
+  "resources": [
+    {
+      "name": "bpm_data",
+      "path": "bpm_data.csv",
+      "description": "Raw heart rate readings exported from Huawei Health",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 11823,
+      "schema": {
+        "fields": [
+          {
+            "name": "date",
+            "type": "string",
+            "description": "Date of reading in M/D/YYYY format",
+            "example": "3/1/2026"
+          },
+          {
+            "name": "bpm",
+            "type": "integer",
+            "description": "Heart rate in beats per minute",
+            "example": 84
+          },
+          {
+            "name": "time",
+            "type": "string",
+            "description": "Time of reading in HH:MM format (24-hour)",
+            "example": "23:59"
+          }
+        ]
+      }
+    },
+    {
+      "name": "step_data",
+      "path": "step_data.csv",
+      "description": "Raw step count intervals exported from Huawei Health",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 4604,
+      "schema": {
+        "fields": [
+          {
+            "name": "date",
+            "type": "string",
+            "description": "Date of interval in M/D/YYYY format",
+            "example": "3/1/2026"
+          },
+          {
+            "name": "steps",
+            "type": "integer",
+            "description": "Number of steps recorded in the interval",
+            "example": 27
+          },
+          {
+            "name": "time_start",
+            "type": "string",
+            "description": "Interval start time in HH:MM format (24-hour)",
+            "example": "19:02"
+          },
+          {
+            "name": "time_end",
+            "type": "string",
+            "description": "Interval end time in HH:MM format (24-hour)",
+            "example": "19:03"
+          }
+        ]
+      }
+    },
+    {
+      "name": "timeline_aligned",
+      "path": "timeline_aligned.csv",
+      "description": "Minute-level aligned timeline merging BPM and step data, with derived features (activity, sleep detection)",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 36930,
+      "schema": {
+        "fields": [
+          {"name": "minute", "type": "datetime", "description": "Minute timestamp (YYYY-MM-DD HH:MM:SS)"},
+          {"name": "bpm", "type": "number", "description": "Observed BPM (NaN if missing)"},
+          {"name": "steps", "type": "integer", "description": "Step count in that minute (0 if none)"},
+          {"name": "hour", "type": "integer", "description": "Hour of day (0-23)"},
+          {"name": "day", "type": "date", "description": "Date (YYYY-MM-DD)"},
+          {"name": "bpm_missing", "type": "integer", "description": "1 if BPM is missing, 0 if observed"},
+          {"name": "is_active", "type": "integer", "description": "1 if steps > 0 in that minute"},
+          {"name": "inactive_streak_id", "type": "integer", "description": "ID for consecutive inactive streaks"},
+          {"name": "long_inactive", "type": "boolean", "description": "True if inactive streak > 60 min"},
+          {"name": "is_likely_sleeping", "type": "boolean", "description": "True if detected as likely sleep period"}
+        ]
+      }
+    },
+    {
+      "name": "timeline_features",
+      "path": "timeline_features.csv",
+      "description": "Full feature-engineered timeline with 42 columns including temporal encodings, rolling step statistics, and neighboring BPM features",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 36930
+    },
+    {
+      "name": "imputed_bpm",
+      "path": "imputed_bpm.csv",
+      "description": "Timeline with Linear Regression and Random Forest imputed BPM values",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 36930
+    },
+    {
+      "name": "imputed_bpm_all",
+      "path": "imputed_bpm_all.csv",
+      "description": "Timeline with LR, RF, and SAITS imputed BPM values",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "encoding": "utf-8",
+      "rows": 36930
+    }
+  ],
+  "statistics": {
+    "heart_rate": {
+      "records": 11823,
+      "coverage_percent": 32,
+      "mean_bpm": 79.4,
+      "std_bpm": 14.2,
+      "min_bpm": 46,
+      "max_bpm": 176,
+      "missingness_type": "MAR (Missing At Random — depends on time-of-day and activity level)"
+    },
+    "steps": {
+      "records": 4604,
+      "daily_average_steps": 7500,
+      "note": "Only non-zero intervals recorded"
+    },
+    "timeline": {
+      "total_minutes": 36930,
+      "start": "2026-03-01T08:30:00",
+      "end": "2026-03-26T23:59:00",
+      "dense_days_count": 8,
+      "sparse_days_count": 10
+    }
+  }
+}
